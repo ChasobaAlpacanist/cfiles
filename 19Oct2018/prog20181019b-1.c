@@ -6,8 +6,10 @@ int main(void){
   float num2 = 0.0;
   float ans = num + num2;
 
-  printf("%d(int) + %f(float) = %.3f(float)\n", num, num2, ans);
+  //int + float = float
+  printf("%d + %f = %.3f\n", num, num2, ans);
 
+  //
   double num3 = 1.25;
   printf("%d(int) + %f(double) = %f(double)\n", num, num3, num + num3);
   printf("明示的キャスト\n");
