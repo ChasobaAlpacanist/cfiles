@@ -9,6 +9,7 @@ int slime_damage(int a, int slime_hp, int slime_power, int guard){
   if(slime_hp > 1){
     printf("スライムのこうげき！\n");
     getch();
+    srand((unsigned int)time(NULL));
     double power_coefficient = 0.9 + (float)(rand() % 1001) * 0.0002;
     int attack = (int)(power_coefficient * slime_power - (double)guard / 6);
     switch(a){
