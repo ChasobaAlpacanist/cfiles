@@ -12,10 +12,11 @@
 #define NOEQUIP 0
 #define POWER_RAND_RANGE 5  //ちから、身のまもりの乱数生成のための範囲
 #define G_RATE_RAND_RANGE 8  //成長率の乱数生成のための範囲
+#define NUMBER_OF_ITEMS 4 //持ち物の数
 
 typedef struct equip{ //装備
   int type;   //タイプ（なしの場合はNOEQUIP）
-  char name[STR_MAX];  //武器名
+  char name[STR_MAX];;  //武器名
   int point;   //武器によるステータスの修正値
 } equip_t;
 
@@ -51,19 +52,19 @@ void swap_member(player_t *party, int id1, int id2);  //1-1.8
 
 equip_t equip(player_t *chara, equip_t equipment);  //1-1.9
 
-void export_party();  //保存ファイル名、パーティーの情報を引数とする 1-1.10
-void import_party();  //ファイルからパーティーを作成引数はパーティーのポインタ 1-1.11
+void export_party(char filename[STR_MAX], player_t *party);  //保存ファイル名、パーティーの情報を引数とする 1-1.10
+void import_party(char filename[STR_MAX], player_t *new_party);  //ファイルからパーティーを作成引数はパーティーのポインタ 1-1.11
 
 //main
 int main(void){
   srand((unsigned) time(NULL));
 
   //characters
-  player_t chara1 = gen_player("KUSO");
-  player_t chara2 = gen_player("MAJIKUSO");
-  player_t chara3 = gen_player("HONTOKUSO");
-  player_t chara4 = gen_player("KUSOKUSO");
-  player_t chara5 = gen_player("KUSOKUSOKUSO");
+  player_t chara1 = gen_player("Yuusya");
+  player_t chara2 = gen_player("Sensi");
+  player_t chara3 = gen_player("Kenja");
+  player_t chara4 = gen_player("Souryo");
+  player_t chara5 = gen_player("Budouka");
   //characters pointer
   player_t *chara1_p = &chara1;
   player_t *chara2_p = &chara2;
@@ -75,9 +76,7 @@ int main(void){
 
 
   //equipment
-  equip_t item1 = {1, "HOMEWORKKILLER", 10};
-  equip_t item2 = {2, "SYUKUDAIHOROBE", 5};
-  equip_t item3 = {3, "MOUHARUYAZO", 4};
+  equip_t item1 = {1, "Tsuyoiken", 10};
 
   print_chara_all(chara1_p); //1-1.1, 1-1.2の確認
   printf("\n");
@@ -111,6 +110,9 @@ int main(void){
   printf("%sは%sを装備した！\n", chara1_p->name, equip(chara1_p, item1).name);
 
   print_member_data(chara1_p, chara1_p->id); //chara1のデータを確認 1-1.9の確認。
+
+  char filename[STR_MAX] = "text.txt";
+  export_party(filename, party); //1-1.10の確認
 
 }
 
@@ -155,9 +157,13 @@ player_t gen_player(char name[STR_MAX]){
   character.defense = character.protec;
   character.g_rate = 1.1 + ((rand()%G_RATE_RAND_RANGE + 1) / 10.0); //1.1 ~ 1.9
   character.weapon.type = NOEQUIP;
+  sprintf(character.weapon.name, "%s", "None");
   character.armor.type = NOEQUIP;
+  sprintf(character.armor.name, "%s", "None");
   character.shield.type = NOEQUIP;
+  sprintf(character.shield.name, "%s", "None");
   character.helmet.type = NOEQUIP;
+  sprintf(character.helmet.name, "%s", "None");
   character.prev = NULL;
   character.next = NULL;
 
@@ -300,3 +306,54 @@ equip_t equip(player_t *chara, equip_t equipment){
   }
   return equipment;
 }
+
+void export_party(char filename[STR_MAX], player_t *party){
+  FILE *fp = NULL;
+  fp = fopen(filename, "w");
+
+  player_t *first_player = party;
+  while(party->prev != NULL){ //find first player
+    first_player = party->prev;
+  }
+
+  do {
+    fprintf(fp, "%d %s %d %d %d %d %d %d %.2lf\n", first_player->id,
+      first_player->name, first_player->level, first_player->power,
+      first_player->protec, first_player->speed, first_player->attack,
+      first_player->defense, first_player->g_rate); //print status
+
+    //print items
+    fprintf(fp, "%d %s %d\n", first_player->weapon.type, first_player->weapon.name,
+                            first_player->weapon.point);
+    fprintf(fp, "%d %s %d\n", first_player->armor.type, first_player->armor.name,
+                            first_player->armor.point);
+    fprintf(fp, "%d %s %d\n", first_player->shield.type, first_player->shield.name,
+                            first_player->shield.point);
+    fprintf(fp, "%d %s %d\n", first_player->helmet.type, first_player->helmet.name,
+                            first_player->helmet.point);
+
+    first_player = first_player->next;
+  } while(first_player != NULL);
+  fclose(fp);
+}
+
+/* void import_party(char filename[STR_MAX], player_t *new_party){
+  FILE *fp = NULL;
+  fp = fopen(filename, "r");
+  assert(fp != NULL);
+  int num_lines = 0; //得られたファイルの行数を数える
+
+  char str[STR_MAX];
+  while(fgets(str, STR_MAX, fp) != NULL){
+    num_lines++;
+  }
+  fclose(fp);
+  int num_members = num_lines / 5; //1人あたり5行使うため
+
+  new_party = (int *)calloc(num_members, sizeof(player_t));
+
+  fp = fopen(filename, "r");
+  for(int i = 0; i < num_members; i++){
+
+  }
+} */
